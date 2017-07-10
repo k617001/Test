@@ -1,0 +1,105 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ConsoleTest.DataBySplitFile.BackTest
+{
+    public class WeekLine
+    {
+        //停損點百分比
+        int StopLosePointParcent = 80;
+
+        public void Action(NowData data)
+        {
+            int weekAvg = this.GetAvg(data.Date);
+            int beforeClose = this.GetBeforeClose(data.Date);
+            OwnData ownData = this.MyOwn();
+
+            //交叉的判斷
+            if (beforeClose < weekAvg && weekAvg < data.Close)
+            {
+                //目前未擁有，買進
+                if (ownData == null)
+                {
+                    Buy(data);
+                }
+                //已擁有，賣出
+                else
+                {
+                    Sell(data);
+                }
+            }
+
+            //停損點判斷
+            else if (ownData.IsStopLose())
+            {
+                Sell(data);
+            }
+        }
+
+        public void Buy(NowData data)
+        {
+            OwnData buyData = new OwnData()
+            {
+                Point = data.Close,
+                Date = data.Date,
+                StopLosePoint = data.Close * (StopLosePointParcent / 100)
+            };
+        }
+
+        public void Sell(NowData data)
+        {
+        }
+
+
+        private OwnData MyOwn()
+        {
+            return new OwnData();
+        }
+
+        private int GetAvg(DateTime date)
+        {
+            return 0;
+        }
+        /// <summary>
+        /// 前一筆關帳資料
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        private int GetBeforeClose(DateTime date)
+        {
+            return 0;
+        }
+    }
+
+    public class NowData
+    {
+        public int Close { set; get; }
+        public DateTime Date { set; get; }
+    }
+
+    public class OwnData
+    {
+        public List<string> Id { set; get; }
+        public int Point { set; get; }
+        public int StopLosePoint { set; get; }
+        public DateTime Date { set; get; }
+
+        /// <summary>
+        /// 停損點判斷
+        /// </summary>
+        /// <returns></returns>
+        public bool IsStopLose()
+        {
+            return this.Point <= StopLosePoint;
+        }
+
+        public int Count
+        {
+            get {
+                return this.Id.Count;
+            }
+        }
+    }
+}
