@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>jQuery UI Dialog - Default functionality</title>
+
+		
+		<link type="text/css" rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
+		
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+		<script type="text/javascript" src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+	</head>
+	
+	<body> 
+		<button id="btnError">alert error!</button>	
+		<button id="btnInfo">alert info!</button>	
+		<button id="btn2">confirm!</button>	
+		
+
+		<script>
+			function alertError(msg) {
+				alertDialog('Error', msg, 'red');
+			}
+			function alertInfo(msg) {
+				alertDialog('Information', msg, '#428bca');
+			}
+		
+			function alertDialog(title, msg, titleColor) {
+				var 
+					id = '__alertDialog__'
+					$body = $('body'),
+					$dialogDiv = $('#' + id)
+					;
+					
+				if($dialogDiv.size() == 0) {
+					$dialogDiv = $('<div>')
+									.prop('id', id)
+									;
+					$body.append($dialogDiv);
+				}
+				$dialogDiv.html('<p>' + msg + '</p>')
+				
+				var $dialog = $dialogDiv.dialog({
+					title: title,
+					modal: true,
+					buttons: [
+						{
+						  text: "確定",
+						  click: function() {
+							$(this).dialog( "close" );
+						  }
+						}
+					],
+					closeOnEscape: true,
+					open: function(event, ui) {
+						$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+					}
+				});
+				if(titleColor) {
+					$dialog.prev(".ui-dialog-titlebar")
+						.css("background",titleColor)
+						.css("color","#FFFFFF");
+				}	
+			}
+			
+			function confirmDialog(title, msg, okText, concelText, okFunc) {
+				var 
+					id = '__confirmDialog__'
+					$body = $('body'),
+					$dialogDiv = $('#' + id)
+					;
+					
+				if(!okText) {
+					okText = 'Ok'
+				}
+				if(!concelText) {
+					concelText = 'Cancel'
+				}
+					
+				if($dialogDiv.size() == 0) {
+					$dialogDiv = $('<div>')
+									.prop('id', id)
+									;
+					$body.append($dialogDiv);
+				}
+				$dialogDiv.html('<p>' + msg + '</p>')
+				
+				var $dialog = $dialogDiv.dialog({
+					title: title,
+					modal: true,
+					buttons: [
+						{
+						  text: okText,
+						  click: function() {
+							if(okFunc) {
+								okFunc();
+							}
+							$(this).dialog( "close" );
+						  }
+						},
+						{
+						  text: concelText,
+						  click: function() {
+							$(this).dialog( "close" );
+						  }
+						}
+					],
+					closeOnEscape: true,
+					open: function(event, ui) {
+						$(".ui-dialog-titlebar-close", ui.dialog | ui).hide();
+					}
+				});
+			}
+		</script>		
+		
+		<script>
+			$( function() { 
+				$("#btnError").click(function() { 
+					alertError('必填沒填啦，到底在幹嘛!!');
+				}); 
+				$("#btnInfo").click(function() { 
+					alertInfo('223');
+				}); 
+				$("#btn2").click(function() { 
+					confirmDialog('Confirm Title', '123');
+				}); 
+			} );
+		</script>
+	</body>
+</html>
