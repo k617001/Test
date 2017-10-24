@@ -1,0 +1,41 @@
+
+    function isAjaxSend($this) {
+        return $this && $this.data('name');
+    }
+
+    function ajaxSend(setting, $this) {
+        if ($this) {
+            $this.data('name', $this.text())
+                .text('loading...')
+                .css({ 'cursor': 'not-allowed','background': '#FFF' });
+        }
+
+        return $.ajax(setting)
+            .always(function () {
+                if ($this) {
+                    $this
+                        .html('')
+                        .text($this.data('name'))
+                        .css({ 'cursor': '', 'background': '' })
+                        .removeData('name');
+                }
+            })
+            .fail(function (ros) {
+                alert('系統異常');
+            });
+    }
+
+    $('#ajaxTest').click(function () {
+        if (isAjaxSend($(this))) {
+            return;
+        }
+
+        ajaxSend({
+            url: "/Demo/AjaxTest",
+            method: "POST",
+            dataType: "json"
+        }, $(this))
+        .done(function (ros) {
+            alert("success");
+        });
+    });
