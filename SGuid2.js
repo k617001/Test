@@ -128,13 +128,13 @@
 				$end = $('<button type="button" class="btn btn-default" id="ep">>></button> '),
 				$right = $('<button type="button" class="btn btn-default" id="np">></button> '),
                 colspan = setting['column'].length ? 'colspan="' + setting['column'].length + '""' : '',
-				$nowPage = $('<tfoot><tr><td ' + colspan + ' class="footer-paging"  align="center" >'
-                + '<div class="btn-group"></div>'
-                + '</td></tr></tfoot>')
-						.find('div'),
-				otherPage = parseInt(MAX_PAGE / 2),
+				$nowPage = $('<div class="btn-group"></div>'),
+                $tfoot = $('<tfoot><tr><td ' + colspan + ' class="footer-paging"  align="center" ></td></tr></tfoot>'),
+                otherPage = parseInt(MAX_PAGE / 2),
 				max = maxPageNum,
 				start = 1;
+
+            $tfoot.append($nowPage);
 
             //計算頁數永遠在中間
             if (maxPageNum < MAX_PAGE) {
@@ -280,10 +280,10 @@
             }
 
             function init() {
-
-                $table = $this
-					.append($('<div class="table-wrapper"><table></table></div>'))
-                    .find('div table');
+                $tableWarpper = $('<div class="table-wrapper"></div>');
+                $table = $('<table></table>');
+                $this.append($tableWarpper);
+                $tableWarpper.append($table);
 
                 if (setting['title']) {
                     $table.before($('<h4>' + setting['title'] + '</h4><hr>'));
@@ -295,9 +295,8 @@
 
             function drawHeader() {
 
-                var $tr = $table
-                            .append($('<thead><tr></tr></thead>'))
-                            .find('thead tr');
+                var $tr = $('<thead><tr></tr></thead>');
+                $table.append($tr);
 
                 $.each(setting['column'], function (idx, item) {
                     var title = null;
@@ -325,15 +324,15 @@
                 }
 
                 var $tbody = $table.find('tbody').remove();
-                $tbody = $table
-                        .append($('<tbody></tbody>'))
-                        .find('tbody');
+                $tbody = $('<tbody></tbody>');
+                $table.append($tbody);
+
                 $.each(data, function (idx, dataValue) {
 
-                    var $tr = $tbody
-                        .append($('<tr id="tr' + idx + '"></tr>'))
-                        .find('#tr' + idx),
-                        tdCss = '';
+                    var $tr = $('<tr id="tr' + idx + '"></tr>')
+                    tdCss = '';
+                    $tbody.append($tr);
+
 
                     $.each(setting['column'], function (idx, item) {
                         tdCss = '';
@@ -379,28 +378,28 @@
             }
 
             function init() {
-                $table = $this
-                    .append($('<div class="tab-content"><div role="tabpanel" class="tab-pane active" id="tab_info">' +
-                    		'<table class="table table-gray"></table>' +
-                            '</div></div>'))
-                    .find('div table');
+                var $tabContent = $('<div class="tab-content"><div role="tabpanel" class="tab-pane active" id="tab_info"></div></div>'),
+                    $table = $('<table class="table table-gray"></table>');
+                $tabContent.append($table);
+                $this.append($tabContent);
             }
 
             function drawHeader() {
             }
 
             function drawBody(data) {
-                var $ul = $table
-                        .append($('<tr><td><ul class="list-unstyled my-notification"></ul></td></tr>'))
-                        .find('ul');
+                var $ul = $('<ul class="list-unstyled my-notification"></ul>'),
+                    $tr = $('<tr><td></td></tr>');
+                $tr.append($ul);
+                $table.append($tr);
+
                 $.each(data, function (idx, ddata) {
                     if (!ddata) {
                         return 0;
                     }
-                    var $li = $ul
-                        .append($('<li id="li' + idx + '"></li>'))
-                        .find('#li' + idx),
+                    var $li = $('<li id="li' + idx + '"></li>'),
                         template = setting['column']['template'](idx, ddata);
+                    $ul.append($li);
                     if (template) {
                         $li.append($(template));
                     }
@@ -432,9 +431,8 @@
                 if ($table) {
                     return;
                 }
-                $table = $this
-					.append($('<table class="table table-striped">'))
-                    .find('table');
+                $table = $('<table class="table table-striped">');
+                $this.append($table);
 
             }
 
@@ -442,8 +440,6 @@
 
                 var $tr = $('<tr></tr>'),
                     $thead = $('<thead></thead>');
-
-
 
                 $tr.append($('<th>#</th>'));
                 $.each(setting['column'], function (idx, item) {
@@ -502,16 +498,25 @@
                 }
                 var $tbody = $('<tbody></tbody>');
                 var row = (nowP - 1) * pageSize;
-                $.each(data, function (idx, dataValue) {
-
-                    var $tr = $tbody
-                        .append($('<tr id="tr' + idx + '"></tr>'))
-                        .find('#tr' + idx),
-                        tdCss = '';
+                $.each(data, function (rowIdx, dataValue) {
 
                     row++;
+                    var $tr = $('<tr id="_row_' + row + '"></tr>'),
+                        tdCss = '';
+                    $tbody.append($tr);
+
                     $tr.append($('<th>' + row + '</th>'));
-                    $.each(setting['column'], function (idx, item) {
+                    $.each(setting['column'], function (columnIdx, item) {
+
+                        dataValue['__gridInfo'] = {
+                            __no: row,
+                            __dataColumnIndex: columnIdx,
+                            __dataRowIndex: rowIdx
+                        };
+                        dataValue['DataRowIndex'] = function () {
+                            return rowIdx;
+                        };
+
                         tdCss = '';
                         if (item['tdCss']) {
                             tdCss = ' class="' + item['tdCss'] + '"';
@@ -551,6 +556,7 @@
 
 
         return {
+            '$this': this,
             'settings': settings,
             'getData': function () {
                 return findData;
