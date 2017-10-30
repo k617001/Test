@@ -1,18 +1,81 @@
-    var grid = $('#grid').sGrid({
-		url: 'GridOrderData',
-		gridKind: 'ROW_GRID',
-        pageSize: 5,
-		column: [
-			{
-				title: 'Name',
-				data: 'Name',
-				order: true
-},
 
+<div id="grid"></div>
+
+<script type="text/javascript">
+
+
+    function updateRow(row) {
+        console.log(row);
+    }
+
+    var grid = $('#grid').sGrid({
+        url: 'GridOrderData',
+        gridKind: 'ROW_GRID',
+        pageSize: 5,
+        searchedFun: function () {
+            $('.updText').change(function (e) {
+                $(this).css({
+                    'background-color': '#c9e6d3',
+                    'border': '1px solid #03b71f'
+                });
+            });
+        },
+        column: [
+			{
+			    title: 'Name',
+			    data: 'Name',
+			    order: true
+			},
 			{
 			    title: 'Name2',
 			    data: 'Name2',
 			    order: true
+			},
+			{
+			    title: 'input',
+			    width: '10%',
+			    template: function (data) {
+			        var rowNo = data.DataRowIndex();
+			        return '<input type="text" class="updText" id="name_' + rowNo + '" value="' + data['Name2'] + '"/>';
+			    }
+			},
+			{
+			    title: 'button',
+			    template: function (data) {
+			        var rowNo = data.DataRowIndex(),
+			            tmpHtm = '<button onclick="update(' + rowNo + ')">update</button>'
+                                + '<button onclick="cancel(' + rowNo + ')">cancel</button>'
+                        ;
+			        return tmpHtm;
+			    }
 			}
 		]
-	});
+    });
+
+    function update(row) {
+        var $text = grid.$this.find('#name_' + row);
+
+        //ajax update
+
+
+        //更新值到資料列,ajax done時做
+        grid.getData()[row]['Name2'] = $text.val();
+
+        //刪除樣式
+        $text.css({
+            'background-color': '',
+            'border': ''
+        });
+    }
+
+    function cancel(row) {
+        var $text = grid.$this.find('#name_' + row),
+            baseData = grid.getData()[row]['Name2'];
+        $text.val(baseData)
+            //刪除樣式
+            .css({
+                'background-color': '',
+                'border': ''
+            });
+    }
+</script>
