@@ -1,45 +1,18 @@
-    var grid = $('#data').sGrid({
-        url: 'SupplierInfoList',
-        gridKind: 'ROW_GRID',
-        param: {
-            SupName: $('#SupName').val()
-        },
-        column: [
-            {
-                title: '流水序號',
-                data: 'SupNo'
-            },
-            {
-                title: '供應商名稱',
-                data: 'SupName'
-            },
-            {
-                title: '統一編號',
-                data: 'Id'
-            },
-            {
-                title: '聯絡窗口',
-                data: 'ClerkName1'
-            },
-            {
-                title: '電話',
-                data: 'Tel1'
-            },
-            {
-                title: '建立日期',
-                data: 'CreateDateTime',
-                template: function (data) {
-                    return DateUtil.dateTimeToStr(data['CreateDateTime'], 'yyyy-MM-dd');
-                }
-                //width: '10%',
-            },
-            {
-                title: '維護',
-                // width: '20%',
-                template: function (data) {
-                    return '<a class="btn btn-info btn-xs" href="javascript:void(0)" title="修改" onclick="updateData(\'' + data["SerialNo"] + '\');"><i class="fa fa-pencil-square-o "></i></a>'
-                        + '<a class="btn btn-danger btn-xs" href="javascript:void(0)" title="刪除" onclick="delData(\'' + data["SerialNo"] + '\');"><i class="fa fa-trash-o "></i></a>';
-                }
-            }
-        ]
-    });
+    var grid = $('#grid').sGrid({
+		url: 'GridOrderData',
+		gridKind: 'ROW_GRID',
+        pageSize: 5,
+		column: [
+			{
+				title: 'Name',
+				data: 'Name',
+				order: true
+},
+
+			{
+			    title: 'Name2',
+			    data: 'Name2',
+			    order: true
+			}
+		]
+	});
