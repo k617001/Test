@@ -1,0 +1,234 @@
+@{
+    ViewBag.Title = "GridOrder";
+}
+
+<h2>GridOrder</h2>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.js"></script>
+<script type="text/javascript" src="/Scripts/sGrid.js"></script>
+
+<select id="SelectCategory"></select> <br/><br/>
+<select id="SelectSubCategory"></select> <br/><br/>
+<select id="SelectViewpoint"></select> 
+
+  
+<script type="text/javascript">
+
+    init();
+
+    function init() {
+        createCateger();
+    }
+
+    //連動1
+    function createCateger() {
+        createSelect($('#SelectCategory'), {
+            data: data1(),
+            value: 'categoryId',
+            text: 'categoryName',
+            selectedValue: '1',
+            items: [{
+                text: '----',
+                value: ''
+            }],
+            onChange: function (selectedValue) {
+                createSub(selectedValue);
+            }
+        });
+    }
+
+    //連動2
+    function createSub(selectdata) {
+        var data = [];
+        if (selectdata === '1') {
+            data = data2();
+        }
+        else if (selectdata === '2') {
+            data = data3();
+        }
+        createSelect($('#SelectSubCategory'), {
+            data: data,
+            value: 'subCategoryId',
+            text: 'subCategoryName',
+            selectedValue: 'S01',
+            items: [{
+                text: '----',
+                value: ''
+            }],
+            onChange: function (selectedValue) {
+                createSub3(selectedValue);
+            }
+        });
+    }
+
+    //連動3
+    function createSub3(selectdata) {
+        createSelect($('#SelectViewpoint'), {
+            //ajax使用
+            ajaxSetting: {
+                url: "/Demo/MSelectList",
+                method: "POST",
+                data: {
+                    id: selectdata
+                }
+            },
+            //顯示與value的指定欄位
+            value: 'Name2',
+            text: 'Name',
+            //預設設定的值
+            selectedValue: '4',
+            //額外增加的item(開始)
+            items: [{
+                text: 'vvvvv',
+                value: ''
+            }]
+        });
+    }
+
+
+    //ajax共用
+    function ajaxSend(setting, $this) {
+        if ($this) {
+            $this.data('name', $this.text())
+                .text('loading...')
+                .css({ 'cursor': 'not-allowed', 'background': '#FFF' });
+        }
+
+        var defaultSetting = {
+            dataType: "json"
+        };
+
+        $.extend(setting, defaultSetting);
+
+        return $.ajax(setting)
+            .always(function () {
+                if ($this) {
+                    $this
+                        .html('')
+                        .text($this.data('name'))
+                        .css({ 'cursor': '', 'background': '' })
+                        .removeData('name');
+                }
+            })
+            .always(function (json) {
+                if (!json['ValidMessage']) {
+                    return;
+                }
+                alert(json['ValidMessage']);
+            })
+            .fail(function (ros) {
+                alert('系統異常');
+            });
+    }
+
+    //組合下拉選單的共用(ajax)
+    function createSelect($select, param) {
+        $select.empty();
+        var items = param['items'];
+        if (items) {
+            appendItems(items);
+        }
+
+        var data = param['data'],
+	        selectedValue = param['selectedValue'],
+	        onChangeFunc = param['onChange'],
+            ajaxSetting = param['ajaxSetting'];
+
+        if (ajaxSetting) {
+            ajaxSend(ajaxSetting)
+                    .done(function (ros) {
+                        setDataToObj(ros['Results']);
+                    });
+        }
+        else {
+            setDataToObj(data);
+        }
+
+
+        var endItems = param['endItems'];
+        if (endItems) {
+            appendItems(endItems);
+        }
+
+        if (onChangeFunc) {
+            $select.change(function (e) {
+                onChangeFunc($(this).val());
+            });
+        }
+
+        function appendItems(items) {
+            $.each(items, function (idx, item) {
+                var $option = $('<option></option>')
+                    .val(item['value'])
+                    .text(item['text']);
+                $select.append($option);
+            })
+        }
+
+        function setDataToObj(data) {
+            $.each(data, function (idx, item) {
+                var v = item[param['value']],
+		        t = item[param['text']],
+		        isSelected = selectedValue === v,
+                $option = $('<option></option>')
+				      .prop('selected', isSelected)
+                      .val(v)
+                      .text(t);
+                $select.append($option);
+
+                //預設展下拉
+                if (isSelected && onChangeFunc != null) {
+                    onChangeFunc(v);
+                }
+            })
+        }
+    }
+
+
+    function data1() {
+        return [
+    {
+        "categoryId": "2",
+        "categoryName": "住宿"
+    },
+    {
+        "categoryId": "1",
+        "categoryName": "景點"
+    }
+  ];
+    }
+
+    function data2() {
+        return [
+    {
+        "subCategoryId": "S01",
+        "subCategoryName": "博物館"
+    },
+    {
+        "subCategoryId": "S02",
+        "subCategoryName": "歷史建築"
+    },
+    {
+        "subCategoryId": "S03",
+        "subCategoryName": "廟宇"
+    }
+  ];
+    }
+
+    function data3() {
+        return [
+    {
+        "subCategoryId": "H01",
+        "subCategoryName": "國際觀光旅館"
+    },
+    {
+        "subCategoryId": "H02",
+        "subCategoryName": "一般觀光旅館"
+    },
+    {
+        "subCategoryId": "H03",
+        "subCategoryName": "一般旅館"
+    }
+  ];
+    }
+</script>
