@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=" utf-8">
+  
+<link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+	//共用開窗
+	function openDialog($select) {
+		var $dialog = $select.dialog({
+									resizable: false,
+									autoOpen: false,
+									height: "auto",
+									modal: true
+								});	
+		$dialog.parent().find(".ui-dialog-titlebar").hide();
+		return $dialog;
+	}
+</script>
+
+<style>
+.viewDiv { 
+	border:#aaaaaa 1px solid; 
+	padding:3px 3px 3px 3px; 
+}
+</style>
+
+</head>
+<body>
+	</br>
+	<button id="openWin">dialog</button>
+
+	<div id="win">
+		value1:<div id="getVal1" class="viewDiv">0</div></br>
+		value2:<div id="getVal2" class="viewDiv">0</div></br>
+		<button id="open">open</button>
+		<button id="close">close</button>
+	</div>
+  
+  
+	<!--以下可用p view-->
+	<div id="win2">
+		value1:<input type="text" id="tt1"/></br></br>
+		value2:<input type="text" id="tt2"/></br></br>
+		<button id="send">send</button>
+		<button id="close">close</button>
+		<script>
+			var $dialog = openDialog($("#win2"));
+			$dialog.find('#send').click(function() {
+				getValueFun({
+					value1: $dialog.find('#tt1').val(),
+					value2: $dialog.find('#tt2').val()
+				});
+				closeWin();
+			});
+			
+			$dialog.find('#close').click(function() {
+				closeWin();
+			});
+			
+			function closeWin() {
+				$dialog.find('#tt1').val('');
+				$dialog.find('#tt2').val('');
+				$dialog.dialog("close");
+			}
+			
+			var getValueFun = null;
+			function openWin2(getValue) {
+				$dialog.dialog( "open" );
+				getValueFun = getValue;
+			}
+		</script> 
+  </div> 
+  
+	<script>
+		var $dialog12 = openDialog($("#win"));
+		$dialog12.find('#open').click(function() {
+			openWin2(function(data) {
+				$dialog12.find('#getVal1').html(data['value1']);
+				$dialog12.find('#getVal2').html(data['value2']);
+			});	
+		});	
+		
+		$dialog12.find('#close').click(function() {
+			$dialog12.dialog( "close" );
+		});	
+		
+		$('#openWin').click(function() {
+			$dialog12.dialog( "open" );
+		});	
+	</script>	
+  
+</body>
+</html>
