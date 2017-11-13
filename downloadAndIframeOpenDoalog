@@ -1,0 +1,88 @@
+
+<h2>DownloadFile</h2>
+
+
+<link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css" />
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+    //共用開窗
+    function openDialog($select) {
+        var dWidth = $(window).width() * 0.6,
+            dHeight = $(window).height() * 0.8,
+            $dialog = $select.dialog({
+                resizable: false,
+                autoOpen: false,
+                height: dHeight,
+                width: dWidth,
+                modal: true
+            });
+        $dialog.parent().find(".ui-dialog-titlebar").hide();
+        return $dialog;
+    }
+</script>
+
+<br>
+<br>
+
+<button id="download">iframe下載</button></br></br>
+<button id="openIframeReport">dialog iframe</button></br>
+
+<div id="reportDialog"></div>
+<script>
+    //共用下載檔案
+    function downloadFile(url, param) {
+        var $iframe = $('#_downloadIframe'),
+            paramStr = $.param(param),
+            src = url + (!paramStr ? '' : '?' + paramStr);
+        if ($iframe.length == 0) {
+            $iframe = $("<iframe></iframe>")
+                        .css({ 'display': 'none' })
+                        .prop({'id': '_downloadIframe'})
+                        .appendTo(body);
+        }
+        $iframe.prop("src", url);
+        $iframe.load(function () {
+            $("body").append("<div>Failed to download <i>'" + dlLink + "'</i>!");
+        });
+    }
+
+    //共用dialog開iframe
+    function dialogIFrame($selector, url, param) {
+        var dWidth = $(window).width() * 0.6 - 35,
+            dHeight = $(window).height() * 0.75;
+
+        var $iframe = $selector.find('#_iframeWin'),
+            paramStr = !param ? '' : $.param(param),
+            src = url + (paramStr ? '?' + paramStr : ''),
+            $dialog = openDialog($selector);
+
+        if ($iframe.length == 0) {
+            $iframe = $("<iframe></iframe>")
+                .prop({
+                    'id': '_iframeWin',
+                    'width': dWidth + 'px',
+                    'height': dHeight + 'px',
+                    'frameborder': '0'
+                }).appendTo(body);
+            $selector.append($iframe);
+        }
+        $iframe.prop("src", url);
+
+        $dialog.dialog("open");
+    }
+
+
+    $('#download').click(function () {
+        downloadFile('GetFile', param = {'a': '1'});
+    });
+
+
+    $('#openIframeReport').click(function () {
+
+        var url = 'http://blog.darkthread.net/post-2011-08-12-ajax-download-with-iframe.aspx#9576';
+        dialogIFrame($('#reportDialog'), url);
+    });
+
+</script>
