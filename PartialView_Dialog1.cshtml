@@ -1,0 +1,72 @@
+@{
+    ViewBag.IdName = "XxxSelectDialog";
+}
+
+
+
+<!--開窗定義-->
+<div id="@ViewBag.IdName" style="display:none">
+    <div id="grid"></div>
+
+    <script type="text/javascript">
+        function @(ViewBag.IdName)() {
+            var $this = $('#@(ViewBag.IdName)'),
+                $grid = $this.find('#grid'),
+                $dialog = null,
+                grid = null,
+                valueFun = null;
+
+            //開窗
+            this.open = function (fun) {
+                valueFun = fun;
+                $dialog = openDialog($this);
+                $dialog.dialog("open");
+                initGrid();
+            }
+
+            function initGrid() {
+                if (grid) {
+                    grid.reBuildData();
+                    return;
+                }
+                grid = $grid.sGrid({
+                    url: 'GridOrderData',
+                    gridKind: 'ROW_GRID',
+                    pageSize: 5,
+                    trCss: 'selectTr',
+                    searchedFun: function () {
+                        //選資料
+                        $grid.find('.selectTr').click(function (e) {
+                            var rowIdx = $(this).find('#rowIdx').html();
+                            baseData = grid.getData()[rowIdx];
+                            valueFun(baseData);
+                            $dialog.dialog("close");
+                        });
+                    },
+                    column: [
+			            {
+			                title: 'Name',
+			                data: 'Name',
+			                order: true
+			            },
+			            {
+			                title: 'Name2',
+			                data: 'Name2',
+			                order: true
+			            },
+			            {
+			                title: 'Name3',
+			                data: 'Name2',
+			                order: true
+			            },
+			            {
+			                title: 'Name4',
+			                data: 'Name2',
+			                order: true
+			            }
+		            ]
+                });
+            }
+        }
+    </script>
+</div>
