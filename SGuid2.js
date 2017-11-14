@@ -100,14 +100,11 @@
         }
 
         function getView(kind) {
-            if (kind == 'CONTENT_GRID') {
-                return new ContentView(setting, $table, $this);
-            }
-            else if (kind == 'ROW_GRID') {
+            if (kind == 'ROW_GRID') {
                 return new RowView(setting, $table, $this);
             }
             else {
-                return new View(setting, $table, $this);
+                return new RowView(setting, $table, $this);
             }
         }
 
@@ -264,153 +261,6 @@
             });
         }
 
-
-        function View(setting, $table, $this) {
-
-            this.view = function (footHtm, pageEvent, data) {
-                if (!$this.find('div table').html()) {
-                    init();
-                    drawHeader();
-                }
-                drawBody(data);
-
-                $table.find('.btn-group').remove()
-                $table.append(footHtm);
-                pageEvent();
-            }
-
-            function init() {
-                $tableWarpper = $('<div class="table-wrapper"></div>');
-                $table = $('<table></table>');
-                $this.append($tableWarpper);
-                $tableWarpper.append($table);
-
-                if (setting['title']) {
-                    $table.before($('<h4>' + setting['title'] + '</h4><hr>'));
-                }
-                else if (setting['titleTemplate']) {
-                    $table.before($('' + setting['titleTemplate']() + ''));
-                }
-            }
-
-            function drawHeader() {
-
-                var $tr = $('<thead><tr></tr></thead>');
-                $table.append($tr);
-
-                $.each(setting['column'], function (idx, item) {
-                    var title = null;
-                    if (item['title']) {
-                        title = item['title'];
-                    }
-                    else if (item['titleTemplate']) {
-                        title = item['titleTemplate']();
-                    }
-                    else {
-                        title = item['data'];
-                    }
-
-                    var $th = $('<th>' + title + '</th>')
-                        .css({
-                            'width': item['width']
-                        });
-                    $tr.append($th);
-                });
-            }
-
-            function drawBody(data) {
-                if (!data || data.length == 0) {
-                    return;
-                }
-
-                var $tbody = $table.find('tbody').remove();
-                $tbody = $('<tbody></tbody>');
-                $table.append($tbody);
-
-                $.each(data, function (idx, dataValue) {
-
-                    var $tr = $('<tr id="tr' + idx + '"></tr>')
-                    tdCss = '';
-                    $tbody.append($tr);
-
-
-                    $.each(setting['column'], function (idx, item) {
-                        tdCss = '';
-                        if (item['tdCss']) {
-                            tdCss = ' class="' + item['tdCss'] + '"';
-                        }
-                        if (!dataValue) {
-                            $tr.append($('<td ' + tdCss + '>&nbsp</td>'));
-                            return;
-                        }
-                        var dataName = item['data'],
-                            template = item['template'],
-                            view = null;
-
-                        if (dataName) {
-                            view = dataValue[dataName];
-                        }
-                        if (template) {
-                            view = template(dataValue);
-                        }
-                        $tr.append($('<td ' + tdCss + '>' + view + '</td>'));
-
-                    });
-                });
-
-            }
-        }
-
-
-
-
-        function ContentView(setting, $table, $this, data, pageEvent) {
-
-            this.view = function (footHtm, pageEvent, data) {
-                init();
-                drawHeader();
-                drawBody(data);
-
-                $table.append(footHtm);
-
-
-                pageEvent();
-            }
-
-            function init() {
-                var $tabContent = $('<div class="tab-content"><div role="tabpanel" class="tab-pane active" id="tab_info"></div></div>'),
-                    $table = $('<table class="table table-gray"></table>');
-                $tabContent.append($table);
-                $this.append($tabContent);
-            }
-
-            function drawHeader() {
-            }
-
-            function drawBody(data) {
-                var $ul = $('<ul class="list-unstyled my-notification"></ul>'),
-                    $tr = $('<tr><td></td></tr>');
-                $tr.append($ul);
-                $table.append($tr);
-
-                $.each(data, function (idx, ddata) {
-                    if (!ddata) {
-                        return 0;
-                    }
-                    var $li = $('<li id="li' + idx + '"></li>'),
-                        template = setting['column']['template'](idx, ddata);
-                    $ul.append($li);
-                    if (template) {
-                        $li.append($(template));
-                    }
-
-
-                });
-
-            }
-        }
-
-
         function RowView(setting, $table, $this, data, pageEvent) {
 
 
@@ -503,9 +353,14 @@
                     row++;
                     var $tr = $('<tr id="_row_' + row + '"></tr>'),
                         tdCss = '';
+
+                    if (setting['trCss']) {
+                        $tr.addClass(setting['trCss']);
+                    }
                     $tbody.append($tr);
 
-                    $tr.append($('<th>' + row + '</th>'));
+                    $tr.append($('<th></th>').prop({ 'id': 'row' }).html(row));
+                    $tr.append($('<td></td>').css({ 'display': 'none' }).prop({ 'id': 'rowIdx' }).html(rowIdx));
                     $.each(setting['column'], function (columnIdx, item) {
 
                         dataValue['__gridInfo'] = {
@@ -547,13 +402,11 @@
 
                 });
 
-                $('table').find('tbody').remove();
+                $table.find('tbody').remove();
                 $table.append($tbody);
 
             }
         }
-
-
 
         return {
             '$this': this,
