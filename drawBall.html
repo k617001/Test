@@ -1,3 +1,5 @@
+
+<meta name="robots" content="noindex">
 <html>
 <head>
   <meta charset="utf-8">
@@ -17,7 +19,7 @@ canvas {
 </head>
 <body>
 	<div class="wwin">
-		<canvas id="myCanvas" width="500" height="100"></canvas>
+		<canvas id="myCanvas" width="300" height="300"></canvas>
 	</div>
 	<script id="jsbin-javascript">
 
@@ -27,8 +29,8 @@ canvas {
 			//設定球的狀態
 			this.x = randomRange(ballRadius, canvas.width - ballRadius);
 			this.y = canvas.height - ballRadius;
-			this.dx = randomRange(1,3);
-			this.dy = randomRange(1,3)*-1;
+			this.dx = randomRange(1,4);
+			this.dy = randomRange(1,4)*-1;
 		  
 			//繪圖
 			this.drawBall = function () {
@@ -70,13 +72,22 @@ canvas {
 				moveBall(balls[i])
 			}
 			
+			
 			for(var i = 0; i < ballCount; i++) {
 				collisionDetection(i)
 			}
 			
 			for(var i = 0; i < ballCount; i++) {
-				balls[i].drawBall();
+				var nextIdx = (i+1) >= ballCount ? 0 : i+1;
+			
+				var ball0 = balls[i];
+				var ball1 = balls[nextIdx];
+				ctx.beginPath(); 
+				ctx.moveTo(ball0.x,ball0.y);
+				ctx.lineTo(ball1.x,ball1.y);
+				ctx.stroke();	
 			}
+			
 			
 			//test config
 			/*
@@ -98,6 +109,12 @@ canvas {
 				ctx.stroke();
 			}
 			*/
+			
+			
+			
+			for(var i = 0; i < ballCount; i++) {
+				balls[i].drawBall();
+			}
 		}
 		
 		//球移動
@@ -163,13 +180,13 @@ canvas {
 
 		var canvas = document.getElementById("myCanvas"),
 			ctx = canvas.getContext("2d"),
-			ballRadius = 6,
-			ballCount = 10,
+			ballRadius = 5,
+			ballCount = 6,
 			balls = [];
 		
 		SetBalls();
 		//draw();
-		setInterval(draw, 10);
+		setInterval(draw, 30);
 	</script>
 </body>
 </html>
