@@ -19,7 +19,7 @@ canvas {
 </head>
 <body>
 	<div class="wwin">
-		<canvas id="myCanvas" width="300" height="300"></canvas>
+		<canvas id="myCanvas" width="100" height="100"></canvas>
 	</div>
 	<script id="jsbin-javascript">
 
@@ -137,9 +137,12 @@ canvas {
 			ball.y += dy;	
 			ball.dx = dx;
 			ball.dy = dy;		
-			
-			
-
+		}
+		
+		function distance(x1, y1, x2, y2) {
+			var x = Math.abs(x2-x1),
+				y = Math.abs(y2-y1);
+			return Math.sqrt(x*x + y*y);
 		}
 		
 		//碰撞
@@ -148,40 +151,43 @@ canvas {
 				x = ball.x,
 				y = ball.y,
 				dx = ball.dx,
-				dy = ball.dy,
-				isBallkickX = false,
-				isBallkickY = false;
+				dy = ball.dy;
 				
 			for(var i = 0; i < ballCount; i++) {
+				var iskick = false;
 				if(i === myIndex) {
 					continue;
 				}
 				var chkBall = balls[i],
 					chkX = chkBall.x,
-					chkY = chkBall.y;
+					chkY = chkBall.y,
+					dc = distance(x, y, chkX, chkY) - (ballRadius*2),
+					iskick = dc <= 0;
 				
-				if(x > chkX-ballRadius && x < chkX + ballRadius) {
-					dx = -dx;
-					isBallkickX = true;
+				if(iskick) {
+					if(x > chkX-ballRadius && x < chkX + ballRadius) {
+						dx = -dx;
+						isBallkickX = true;
+					}
+					if(y > chkY-ballRadius && y < chkY + ballRadius) {
+						dy = -dy;
+						isBallkickY = true;
+					}
+				
+					if(isBallkickX && isBallkickY) {
+						ball.x += dx;
+						ball.y += dy;	
+						ball.dx = dx;
+						ball.dy = dy;
+					}
 				}
-				if(y > chkY-ballRadius && y < chkY + ballRadius) {
-					dy = -dy;
-					isBallkickY = true;
-				}
-			}
-			
-			if(isBallkickX && isBallkickY) {
-				ball.x += dx;
-				ball.y += dy;	
-				ball.dx = dx;
-				ball.dy = dy;
 			}
 		}
 
 		var canvas = document.getElementById("myCanvas"),
 			ctx = canvas.getContext("2d"),
 			ballRadius = 5,
-			ballCount = 6,
+			ballCount = 5,
 			balls = [];
 		
 		SetBalls();
