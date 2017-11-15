@@ -1,0 +1,175 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+<style id="jsbin-css">
+canvas { 
+	background: #eee; 
+}
+
+.wwin {
+	position:absolute;
+	right:20px;
+	bottom:20px;
+	border:#aaaaaa 1px solid; 
+}
+</style>
+</head>
+<body>
+	<div class="wwin">
+		<canvas id="myCanvas" width="500" height="100"></canvas>
+	</div>
+	<script id="jsbin-javascript">
+
+		function Ball(ctx) {
+			var color = getRandomColor();
+			
+			//設定球的狀態
+			this.x = randomRange(ballRadius, canvas.width - ballRadius);
+			this.y = canvas.height - ballRadius;
+			this.dx = randomRange(1,3);
+			this.dy = randomRange(1,3)*-1;
+		  
+			//繪圖
+			this.drawBall = function () {
+				ctx.beginPath();
+				ctx.arc(this.x, this.y, ballRadius, 0, Math.PI*2);
+				ctx.fillStyle = color;
+				ctx.fill();
+				ctx.closePath();
+			};
+			
+			//亂數區間
+			function randomRange(min, max) {
+				return Math.floor(Math.random() * (max - min + 1)) + min;
+			}
+
+			//亂數顏色
+			function getRandomColor() {
+				var letters = '0123456789ABCDEF';
+				var color = '#';
+				for (var i = 0; i < 6; i++) {
+					color += letters[Math.floor(Math.random() * letters.length)];
+				}
+				return color;
+			}
+		}
+
+		//設定幾個球
+		function SetBalls() {
+			for(var i = 0; i < ballCount; i++) {
+				balls.push(new Ball(ctx));
+			}
+		}
+		  
+		 //繪圖
+		function draw() {
+			
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			for(var i = 0; i < ballCount; i++) {
+				moveBall(balls[i])
+			}
+			
+			for(var i = 0; i < ballCount; i++) {
+				collisionDetection(i)
+			}
+			
+			for(var i = 0; i < ballCount; i++) {
+				balls[i].drawBall();
+			}
+			
+			//test config
+			/*
+			for(var i = 0; i < ballCount; i++) {
+				var ball = balls[i];
+				ctx.beginPath(); 
+				ctx.moveTo(ball.x,0);
+				ctx.lineTo(ball.x,canvas.height);
+				ctx.stroke();	
+
+				ctx.beginPath(); 
+				ctx.moveTo(ball.x-ballRadius,0);
+				ctx.lineTo(ball.x-ballRadius,canvas.height);
+				ctx.stroke();	
+
+				ctx.beginPath(); 
+				ctx.moveTo(ball.x+ballRadius,0);
+				ctx.lineTo(ball.x+ballRadius,canvas.height);
+				ctx.stroke();
+			}
+			*/
+		}
+		
+		//球移動
+		function moveBall(ball) {
+			var x = ball.x,
+				y = ball.y,
+				dx = ball.dx,
+				dy = ball.dy;
+				
+				
+			
+			if(x + dx > canvas.width || x + dx < ballRadius) {
+				dx = -dx;
+			}
+			if(y + dy > canvas.height || y + dy < ballRadius) {
+				dy = -dy;
+			}
+			
+			ball.x += dx;
+			ball.y += dy;	
+			ball.dx = dx;
+			ball.dy = dy;		
+			
+			
+
+		}
+		
+		//碰撞
+		function collisionDetection(myIndex) {
+			var ball = balls[myIndex],
+				x = ball.x,
+				y = ball.y,
+				dx = ball.dx,
+				dy = ball.dy,
+				isBallkickX = false,
+				isBallkickY = false;
+				
+			for(var i = 0; i < ballCount; i++) {
+				if(i === myIndex) {
+					continue;
+				}
+				var chkBall = balls[i],
+					chkX = chkBall.x,
+					chkY = chkBall.y;
+				
+				if(x > chkX-ballRadius && x < chkX + ballRadius) {
+					dx = -dx;
+					isBallkickX = true;
+				}
+				if(y > chkY-ballRadius && y < chkY + ballRadius) {
+					dy = -dy;
+					isBallkickY = true;
+				}
+			}
+			
+			if(isBallkickX && isBallkickY) {
+				ball.x += dx;
+				ball.y += dy;	
+				ball.dx = dx;
+				ball.dy = dy;
+			}
+		}
+
+		var canvas = document.getElementById("myCanvas"),
+			ctx = canvas.getContext("2d"),
+			ballRadius = 6,
+			ballCount = 10,
+			balls = [];
+		
+		SetBalls();
+		//draw();
+		setInterval(draw, 10);
+	</script>
+</body>
+</html>
