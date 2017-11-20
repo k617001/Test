@@ -23,9 +23,9 @@
             orderColumnName = '',
             orderIdx = '',
 
-            ORDER_DEFAULT_STYLE = '^v',
-            ORDER_ASC_STYLE = '^',
-            ORDER_DESC_STYLE = 'v';
+            ORDER_DEFAULT_STYLE = '<i class="fa fa-sort" aria-hidden="true"></i>',
+            ORDER_ASC_STYLE = '<i class="fa fa-sort-asc" aria-hidden="true"></i>',
+            ORDER_DESC_STYLE = '<i class="fa fa-sort-desc" aria-hidden="true"></i>';
 
         defultValue();
 
@@ -316,18 +316,18 @@
                             .addClass('order')
                             .data('column', item)
                             .data('columnIdx', idx)
-                            .text(title + ' ' + ORDER_DEFAULT_STYLE);
+                            .html(title + ' ' + ORDER_DEFAULT_STYLE);
                     }
 
                     if (orderIdx === idx) {
                         if (orderStatus == 0) {
-                            $th.text(title + ' ' + ORDER_DEFAULT_STYLE);
+                            $th.html(title + ' ' + ORDER_DEFAULT_STYLE);
                         }
                         else if (orderStatus == 1) {
-                            $th.text(title + ' ' + ORDER_ASC_STYLE);
+                            $th.html(title + ' ' + ORDER_ASC_STYLE);
                         }
                         else if (orderStatus == 2) {
-                            $th.text(title + ' ' + ORDER_DESC_STYLE);
+                            $th.html(title + ' ' + ORDER_DESC_STYLE);
                         }
                     }
 
