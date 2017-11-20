@@ -1,0 +1,22 @@
+
+
+//轉excel的使用
+        public ActionResult ExlReport(string param)
+        {
+            MemoryStream stream = new MemoryStream(Resources.TestXLS);
+            ExcelWriterHelper exlWrHelper = new ExcelWriterHelper();
+
+            IWorkbook iwk = exlWrHelper.SetWorkBook(stream);
+            exlWrHelper.SetSheet(iwk.GetSheetAt(0));
+
+            List<XxxEntity> list = XxxEntity.GetList();
+
+            exlWrHelper.SetRowCellIndex(1, 0);
+            foreach (XxxEntity entity in list)
+            {
+                exlWrHelper.SetCellValue(entity.No);
+                exlWrHelper.SetCellValue(entity.Name);
+                exlWrHelper.NextRow();
+            }
+
+            return File(exlWrHelper.SaveToStream(), "application/octet-stream", "aaaaaa.xls");
