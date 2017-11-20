@@ -42,7 +42,7 @@
                         .prop({'id': '_downloadIframe'})
                         .appendTo(body);
         }
-        $iframe.prop("src", url);
+        $iframe.prop("src", src);
         $iframe.load(function () {
             $("body").append("<div>Failed to download <i>'" + dlLink + "'</i>!");
         });
@@ -68,7 +68,7 @@
                 }).appendTo(body);
             $selector.append($iframe);
         }
-        $iframe.prop("src", url);
+        $iframe.prop("src", src);
 
         $dialog.dialog("open");
     }
