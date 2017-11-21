@@ -1,4 +1,3 @@
-
 (function ($) {
 
     $.fn.sGrid = function (settings) {
@@ -16,7 +15,8 @@
 			maxPageNum = 0,
             MAX_PAGE = 5, //總頁數
             findData = null,
-            param = null
+            param = null,
+			FootHtm = null
         ;
         //排序使用
         var orderStatus = 0,
@@ -26,6 +26,7 @@
             ORDER_DEFAULT_STYLE = '<i class="fa fa-sort" aria-hidden="true"></i>',
             ORDER_ASC_STYLE = '<i class="fa fa-sort-asc" aria-hidden="true"></i>',
             ORDER_DESC_STYLE = '<i class="fa fa-sort-desc" aria-hidden="true"></i>';
+        SELECT_COLUMN_STYLE = '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
 
         defultValue();
 
@@ -37,6 +38,7 @@
                 pageSize: 10,
                 param: {},
                 gridKind: 'GRID',
+                selectViewColumn: false,
                 searchedFun: function (data, dataSize) {
                 }
             };
@@ -94,6 +96,10 @@
                         setting['searchedFun'](data, dataSize);
 
                         findData = data
+
+                        if (setting['selectViewColumn']) {
+                            selectColumn(view, $this, setting['column'], pageEvent);
+                        }
                     }
                 });
             }
@@ -114,6 +120,81 @@
         }
 
 
+
+        function selectColumn(view, $self, columns, pageEvent) {
+            var $columnBtn = $('<div id="clickMe" style="cursor:pointer;">'),
+			        $icon = $(SELECT_COLUMN_STYLE).append(' 自訂欄位'),
+			        $selColumnWin = $('<div>')
+				        .prop('id', 'selColumnWin')
+				        .css({
+				            'display': 'none',
+				            'position': 'absolute',
+				            'border': '1px solid #333',
+				            'background': '#ffffff',
+				            'padding': '10px',
+				            'color': '#333',
+				            'border-radius': '3px'
+				        });
+
+            $self.prepend($('<p>').append($columnBtn));
+            $columnBtn.append($icon).append($selColumnWin);
+
+            $.each(columns, function (idx, column) {
+                var $div = $('<div>'),
+				        $label = $('<label class="checkbox-inline">'),
+				        $chkbox = $('<input type="checkbox" checked> '),
+				        title = column['title'];
+
+                $chkbox.prop({ 'value': title });
+                $label.append($chkbox, title);
+                $div.append($label);
+                $selColumnWin.append($div);
+            })
+            $selColumnWin.append('<div><button id="___send">送出</button></div>');
+            $selColumnWin.append('<div><button id="___close">關閉</button></div>');
+
+            $columnBtn.click(function (e) {
+                var offset = $(this).offset();
+
+                $selColumnWin.show()
+				        .css({
+				            'top': (offset.top) + "px",
+				            'left': (offset.left + 20) + "px"
+				        });
+            })
+
+
+            $selColumnWin.find('#___send').click(function () {
+                var $chkboxs = $selColumnWin.find('input[type=checkbox]'),
+				    checkedMap = {};
+                $.each($chkboxs, function (idx, chkbox) {
+                    var $chkbox = $(chkbox);
+                    if ($chkbox.is(':checked')) {
+                        checkedMap[$chkbox.val()] = true;
+                    }
+                });
+
+
+                $.each(columns, function (idx, column) {
+                    var title = column['title'],
+					isShow = checkedMap[title];
+                    column['show'] = false;
+
+                    if (isShow) {
+                        column['show'] = isShow;
+                    }
+                })
+
+                view.drawHeaderBody(findData)
+                $selColumnWin.hide(20);
+            });
+
+
+
+            $selColumnWin.find('#___close').click(function () {
+                $selColumnWin.hide(20);
+            });
+        }
 
         function getFootHtm(gridKind) {
             if (gridKind !== 'ROW_GRID') {
@@ -266,8 +347,8 @@
 
 
             this.view = function (footHtm, pageEvent, data) {
-
                 $this.empty();
+
                 $table = $('<table class="table table-striped">');
                 drawHeader($table);
 
@@ -277,17 +358,14 @@
                 pageEvent();
             }
 
-            function init() {
-                if ($table) {
-                    return;
-                }
-                $table = $('<table class="table table-striped">');
-                $this.append($table);
-
+            this.drawHeaderBody = function (data) {
+                drawHeader($table);
+                drawBody(data);
             }
 
             function drawHeader($table) {
 
+                $table.find('thead').empty();
                 var $tr = $('<tr></tr>'),
                     $thead = $('<thead></thead>');
 
@@ -295,7 +373,12 @@
                 $.each(setting['column'], function (idx, item) {
                     var title = null,
                         order = null,
-                        columnname = item['data'];
+                        columnname = item['data'],
+                        show = item['show'] || item['show'] === undefined ? true : false;
+
+                    if (!show) {
+                        return;
+                    }
                     if (item['title']) {
                         title = item['title'];
                     }
@@ -346,6 +429,10 @@
                 if (!data || data.length == 0) {
                     return;
                 }
+
+
+                $table.find('tbody').empty();
+
                 var $tbody = $('<tbody></tbody>');
                 var row = (nowP - 1) * pageSize;
                 $.each(data, function (rowIdx, dataValue) {
@@ -362,7 +449,7 @@
                     $tr.append($('<th></th>').prop({ 'id': 'row' }).html(row));
                     $tr.append($('<td></td>').css({ 'display': 'none' }).prop({ 'id': 'rowIdx' }).html(rowIdx));
                     $.each(setting['column'], function (columnIdx, item) {
-
+                        var show = item['show'] || item['show'] === undefined ? true : false;
                         dataValue['__gridInfo'] = {
                             __no: row,
                             __dataColumnIndex: columnIdx,
@@ -371,6 +458,10 @@
                         dataValue['DataRowIndex'] = function () {
                             return rowIdx;
                         };
+
+                        if (!show) {
+                            return;
+                        }
 
                         tdCss = '';
                         if (item['tdCss']) {
@@ -413,6 +504,10 @@
             'settings': settings,
             'getData': function () {
                 return findData;
+            },
+            'reColumn': function (columnSet) {
+                setting['column'] = columnSet;
+                view.view(getFootHtm(setting['gridKind']), pageEvent, findData);
             },
             'reBuildData': function (param) {
                 nowP = 1
