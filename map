@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<meta name="robots" content="noindex">
+<html>
+<head>
+<meta charset=" utf-8">
+<meta name="author" content="http://www.softwhy.com/" />
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+  
+  <style>
+	.map-Main {
+		border-width:1px;
+		border-style:solid;
+		border-color:#222222;
+		padding:3px;
+		border-collapse: collapse;
+	}
+	.mapTd {
+		width: 20px;
+		height: 20px;
+	}
+	.SelectedTd {
+		border-width:5px;
+		border-style:solid;
+		border-color:#ffffff;
+	}
+  </style>
+  
+</head>
+<body>
+
+<div id="map"></div>
+  
+<script>
+
+var map = new MapView($('#map'))
+	.row(2)
+	.cell(2)
+	.powerNumber(2)
+	.draw()
+	;
+
+setEvent(map.objAry);
+	
+function setEvent(dataArray) {
+	var r = 0, c = 0;
+	for(r = 0; r < dataArray.length; r++) {
+		for(c = 0; c < dataArray[r].length; c++) {
+			var data = dataArray[r][c],
+				$td = data['mapObj'];
+			
+			$td.click(function() {
+				var power = data['power'],
+					row = data['row'],
+					cell = data['cell'];
+				console.log(row + ',' + cell);
+			});
+		}
+	}
+}
+
+
+
+//繪基本地圖
+function MapView($map) {
+	var that = this,
+		_row = 10,
+		_cell = 10,
+		_powers = 2,
+		_maze = {},
+		dataArray = [],
+		powers = {},
+		colors=[
+			'red',
+			'blue',
+			'#AAAAAA',
+			'green',
+			'#000000'
+		];
+	
+	this.mazeBulider = function(maze) {
+		_maze = maze;
+		return that;
+	};
+	
+	this.row = function(row) {
+		_row = row;
+		return that;
+	}
+	this.cell = function(cell) {
+		_cell = cell;
+		return that;
+	}
+	
+	
+	this.objAry = dataArray;
+	
+	this.powerNumber = function(powerNum) {
+		var powerMapNum = (_row + _cell) / 2,
+			i = 0,
+			startRC = [
+				[0,0],
+				[_row-1,_cell-1],
+				[0,_cell-1],
+				[_row-1,0]
+			];//勢力格子
+			
+		for(i = 0; i < powerNum; i++) {
+			var r = startRC[i][0],
+				c = startRC[i][1],
+				initPos = getAllInitPos(r, c, powerMapNum);
+				$.each(initPos, function(idx, item) {
+					var r = item[0],
+						c = item[1];
+				powers[r+','+c] = {
+						'powerMapNum': powerMapNum,
+						'color' : colors[i],
+						'no' : i,
+						'self': i==0
+					};					
+				});			
+			
+	
+		}
+		return that;
+		
+		function getAllInitPos(r, c, count) {
+			var poss = [
+					[r,c]
+				],
+				addR = r+1 >= _row? -1 : 1,
+				addC = c+1 >= _cell? -1 : 1,
+				posIdx = 0,
+				nowPos = poss[posIdx],
+				cnt = 1;
+				
+				
+			for(var i = 0; i < count-1; i++) {
+				var rr = nowPos[0],
+					cc = nowPos[1];
+				if(cnt > 1 && cnt % 2 == 0) {
+					rr += addR;
+					posIdx++;
+					nowPos = poss[posIdx];
+				}
+				else {
+					cc += addC;
+				}
+				
+				cnt++;
+				poss.push([rr,cc])
+			}
+			return poss;
+		}
+		
+		//亂數顏色
+		/*
+		function getRandomColor() {
+			var letters = '0123456789ABCDEF';
+			var color = '#';
+			for (var i = 0; i < 6; i++) {
+				color += letters[Math.floor(Math.random() * letters.length)];
+			}
+			return color;
+		}*/
+	}
+	
+	this.draw = function() {
+		var r = 0,
+			c = 0,
+			$table = $('<table class="map-Main"></table>');
+		for(r = 0; r < _row; r++) {
+			var $tr = $('<tr class="map-Main"></tr>'),
+				row = [];
+			for(c = 0; c < _cell; c++) {
+				var $td = $('<td align="center" valign="center" class="map-Main mapTd"></td>');
+				$tr.append($td);
+				row.push({
+					'mapObj': $td,
+					'row': r,
+					'cell': c,
+					'power': powers[r+','+c]
+				});
+			}
+			$table.append($tr);
+			dataArray.push(row);
+		}
+		$map.append($table);
+		setPowerToMap();
+		return that;
+	};
+	
+	function setPowerToMap() {
+		var r = 0, c = 0;
+		for(r = 0; r < _row; r++) {
+			for(c = 0; c < _cell; c++) {
+				var power = powers[r+','+c];
+				if(!power) {
+					continue;
+				}
+				
+				var data = dataArray[r][c],
+					$td = data['mapObj'];
+				$td.css(
+					{
+						'backgroundColor' : power['color'],
+						'color' : '#FFFFFF'
+					}).html(1);	
+			}
+		}
+	}
+	
+	
+	
+	return this;
+}
+</script>
+</body>
+</html>
