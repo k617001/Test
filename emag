@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2019 by anonymous (http://jsbin.com/tayawiyayo/16/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+  
+  <title>JS Bin</title>
+</head>
+<body>
+<div id="a"></div>
+<script id="jsbin-javascript">
+
+$.fn.cssAll = function()
+{
+
+	if(!this)
+	{
+		return {};
+	}
+    
+	var obj = {},
+        cssAry = $(this).attr('style').split(';');
+
+	$.each(cssAry, function(idx, item) {
+      var cssKeyVal = item.split(':');
+      if(!cssKeyVal[0] || $.trim(cssKeyVal[0]) === '') {
+        return;
+      }
+      obj[$.trim(cssKeyVal[0])] = $.trim(cssKeyVal[1]);
+    });
+
+	return obj;
+};
+
+$.fn.extend({
+  game: function(item) {
+    var $this = $(this),
+        map = new Map($this, item.map, 'main'),
+        role = new Role(map, item['mainRole']);
+    
+    map.render();
+    role.render();
+    
+    role.right();
+    role.down();
+    role.top();
+    role.left();
+  }
+});
+
+//角色物件
+var Role = function(map, mainRole) {
+    //初始角色資訊
+    var that = this,
+        mapResult = map.mapResult,
+        mapAry = mapResult.mapAry,
+        rowPosX = mainRole.pos.x,
+        rowPosY = mainRole.pos.y,
+        rowStyle = mainRole.style;
+  
+  function next(nextFun) {
+    mapAry[rowPosY][rowPosX].css(map.getFloorStyle(rowPosX,rowPosY));
+    nextFun();
+    that.render();
+  }
+  
+  
+  this.top = function() {
+    next(() => { 
+      rowPosY -= 1; 
+    });
+  };
+  
+  this.down = function() {
+    next(() => { 
+      rowPosY += 1; 
+    });
+  };
+  
+  this.left = function() {
+    next(() => { 
+      rowPosX -= 1; 
+    });
+  };
+  
+  this.right = function() {
+    next(() => { 
+      rowPosX += 1; 
+    });
+  };
+  
+  this.render = function() {
+    var $floor = mapAry[rowPosY][rowPosX];
+    $floor.css(rowStyle);
+  }
+};
+
+//地圖物件
+var Map = function($map, item, mapName) {
+  var mapObjAry = [],   
+      mapBaseData = item.baseData,
+      mapData = item.data, 
+      mapObj = mapData[mapName],
+      mapAry = mapObj.map,
+      mapStyle = mapObj['mapStyle'],
+      width = mapAry[0].length,
+      height = mapAry.length,
+      mapResult = ui();
+  
+  function ui() {
+    var $mapO = $('<table>');
+    for(var row = 0; row < height; row++) {
+      
+      var $row = $('<tr>');
+      mapObjAry[row] = [];
+      
+      for(var column = 0; column < width; column++) {
+        var mapStyleData = mapAry[row][column];
+        var $column = $('<td>').css({
+          'width': mapBaseData['floorWidth'],
+          'height':mapBaseData['floorHeight']
+        }).css(mapStyle[mapStyleData]['style']);
+        
+        mapObjAry[row][column] = $column;
+        $row.append($column);
+      } 
+      $mapO.append($row);
+    }
+    
+    
+    return {
+      mapUi: $mapO,
+      mapAry: mapObjAry
+    };
+  }
+  
+  this.mapResult = mapResult;
+  
+  //取得地板style
+  this.getFloorStyle = function(x, y) {
+    var styleVal = mapAry[y][x];
+    return mapStyle[styleVal].style;
+  };
+  
+  this.render = function() {
+    $map.append(mapResult.mapUi);
+    return mapResult;
+  }
+};
+
+
+var mapBaseData = {
+  floorWidth: '3px',
+  floorHeight: '3px'  
+};
+var mapData = {
+  main: {
+    roleStart: {
+      x:0,
+      y:0
+    },
+    mapStyle: {
+      0:{
+        name: 'floor1',
+        style:{
+          'background-color': '#CCCCCC'
+        },
+        pass: 1, //是否可通過 0:不可,1:可
+        
+      },
+      1: {
+        name: 'floor2',
+        style:{
+          'background-color': 'blue'
+        },
+        pass: 1, //是否可通過 0:不可,1:可        
+      },
+      2: {
+        name: 'floor2',
+        style:{
+          'background-color': 'yellow'
+        },
+        pass: 0, //是否可通過 0:不可,1:可        
+      }
+    },
+    map: [
+      [0,0,0,0,0,0,0,0,0,0,0],
+      [0,1,1,1,1,1,1,1,2,0,0],
+      [0,1,0,0,0,0,0,0,0,0,0],
+      [0,1,0,0,0,0,0,0,0,0,0],
+      [0,1,0,0,0,0,0,0,0,0,0],
+      [0,1,0,0,0,0,0,0,0,0,0],
+      [0,1,0,0,0,0,0,0,0,0,0],
+      [0,1,0,0,0,0,0,0,0,0,0],
+      [0,1,1,1,1,1,1,1,2,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0],
+    ]
+  }
+};
+
+
+$('#a').game({
+  map: {
+    baseData: mapBaseData,
+    data: mapData
+  },
+  mainRole: {
+    pos: {
+      x:0,
+      y:0
+    },
+    style: {
+      'background-color': '#DD00DD'
+    }
+  }
+});
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
