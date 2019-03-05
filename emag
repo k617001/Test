@@ -51,10 +51,7 @@ $.fn.extend({
     map.render();
     role.render();
     
-    role.right();
-    role.down();
-    role.top();
-    role.left();
+    role.event();
   }
 });
 
@@ -74,26 +71,61 @@ var Role = function(map, mainRole) {
     that.render();
   }
   
+  this.event = function () {
+	$('body').keypress(function(e) {
+	  switch(event.which) {
+		case 119:
+			that.top();
+			break;
+		case 115:
+			that.down();
+			break;
+		  break;
+		case 97:
+			that.left();
+			break;
+		case 100:
+			that.right();
+			break;
+	  }
+	});  
+  };
   
+  //執行上
   this.top = function() {
+	if(rowPosY - 1 < 0) {
+		return;
+	}
     next(() => { 
       rowPosY -= 1; 
     });
   };
   
+  //執行下
   this.down = function() {
+	if(rowPosY + 1 >= map.height) {
+		return;
+	}
     next(() => { 
       rowPosY += 1; 
     });
   };
   
+  //執行左
   this.left = function() {
+	if(rowPosX - 1 < 0) {
+		return;
+	}
     next(() => { 
       rowPosX -= 1; 
     });
   };
   
+  //執行右
   this.right = function() {
+	if(rowPosX + 1 >= map.width) {
+		return;
+	}
     next(() => { 
       rowPosX += 1; 
     });
@@ -107,6 +139,7 @@ var Role = function(map, mainRole) {
 
 //地圖物件
 var Map = function($map, item, mapName) {
+	
   var mapObjAry = [],   
       mapBaseData = item.baseData,
       mapData = item.data, 
@@ -116,6 +149,8 @@ var Map = function($map, item, mapName) {
       width = mapAry[0].length,
       height = mapAry.length,
       mapResult = ui();
+  this.width = width;
+  this.height = height;
   
   function ui() {
     var $mapO = $('<table>');
